@@ -1,21 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
-	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
 http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
-http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
-	<flow name="mongo-to-sfdc-queue-syncFlow" doc:id="c55f5dc5-1309-4d74-bc83-6beb5a09cdbd" >
-		<mongo:new-object-trigger doc:name="New Object" doc:id="7748799b-d907-4fbf-a3a4-8f559d93084c" config-ref="MongoDB_Config" collectionName="${mongo.collection}">
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="mongo-to-sfdc-queue-syncFlow" doc:id="87e5b6f6-2856-46f0-b9ba-32e5e26c9d94" >
+		<mongo:new-object-trigger doc:name="new account inserted" doc:id="1833aa22-6748-41c6-9bea-abe05b8bf631" config-ref="MongoDB_Config" collectionName="${mongo.collection}">
 			<scheduling-strategy >
 				<fixed-frequency />
 			</scheduling-strategy>
 		</mongo:new-object-trigger>
-		<anypoint-mq:publish doc:name="Publish" doc:id="647c6189-3e79-491a-98b6-c861395abb32" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.queue}"/>
+		<ee:transform doc:name="convert mongo object to friendly structure" doc:id="8c7cfd44-9143-4bcc-9112-0902481a421c">
+			<ee:message>
+				<ee:set-payload><![CDATA[output application/json
+---
+{
+	"id": payload."_id"."\$oid",
+	name: payload.name default "",
+	dateAdded: (payload.dateAdded."\$date" / 1000) as DateTime,
+	lastModified: (payload.lastModified."\$date" / 1000) as DateTime,
+	billing: {
+		state: payload.billing.state default "",
+		city: payload.billing.city default "",
+		zip: payload.billing.zip default 0
+	},
+	contact: {
+		phone: payload.contact.phone default "",
+		email: payload.contact.email default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<anypoint-mq:publish doc:name="push new account into queue" doc:id="647c6189-3e79-491a-98b6-c861395abb32" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.queue}" />
 	</flow>
-	<flow name="mongo-to-sfdc-queue-syncFlow1" doc:id="54710164-9837-4fa7-8fbc-b8fec06345f1" >
-		<anypoint-mq:subscriber doc:name="Subscriber" doc:id="34d14252-237b-4d2a-a59f-1edd8ce7da66" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.queue}"/>
-		<logger level="INFO" doc:name="Logger" doc:id="252740ff-9958-428c-ace5-5ba1c3363acf" />
+	<flow name="mongo-to-sfdc-queue-syncFlow1" doc:id="54710164-9837-4fa7-8fbc-b8fec06345f1" initialState="started">
+		<anypoint-mq:subscriber doc:name="new account queue" doc:id="34d14252-237b-4d2a-a59f-1edd8ce7da66" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.queue}"/>
+		<salesforce:upsert doc:name="upsert new account" doc:id="3dc1f48e-8154-4f7b-91ad-31e11187c296" config-ref="Salesforce_Config" objectType="Account" externalIdFieldName="Id">
+			<salesforce:records ><![CDATA[#[output application/java
+---
+[{
+	"Name": payload.name,
+	BillingCity: payload.billing.city,
+	BillingState: payload.billing.state,
+	BillingPostalCode: payload.billing.zip as String,
+	Phone: payload.contact.phone,
+	AccountNumber: payload.id
+}]]]]></salesforce:records>
+		</salesforce:upsert>
+		<validation:is-true doc:name="validate successful upsert" doc:id="28794339-7c9a-41d5-ba4f-36a643dc4dc8" expression="#[payload.successful]" message="#[payload.items[0].exception.stackTrace]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3e114a94-c2d1-48f1-96ad-523e68607c87" message="#[payload]"/>
 	</flow>
 </mule>

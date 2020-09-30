@@ -1,0 +1,15 @@
+{
+    "id": "5f7486a192ea33fe3e2f08b9",
+    "name": "Bob Smith - Demo Account Template",
+    "dateAdded": "2020-09-30T04:00:00.000Z",
+    "lastModified": "2020-09-30T13:19:51.137Z",
+    "billing": {
+      "state": "GA",
+      "city": "Atlanta",
+      "zip": 55555
+    },
+    "contact": {
+      "phone": "555-555-5555",
+      "email": "example@test.com"
+    }
+}
