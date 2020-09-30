@@ -1,0 +1,17 @@
+mongo:
+  username: "![D3p51JdEUZ7mTO2eDd9USw==]"
+  password: "![Rb10WCuoljyt9z3fsluy0PnJ3J2Zpl6L]"
+  database: "pocs"
+  collection: "notifications"
+anypoint:
+  mq:
+    client_id: "![WPHC7EjAcb7aKyq0eya3H1FLw15px5V1P7sq42OMBpxGzgg8MK4wzw==]"
+    client_secret: "![1WkPSVmRTsX+b5FtYAPfYoJg/PzrI/pho8PibwOigkiiXPbC2NnwSg==]"
+    exchange: "notifications"
+pushover:
+  userToken: "![FvYgc8+lWkvL/I9XMKB+fqKTw6Lp2vo1d5NZalCLKMw=]"
+  applicationToken: "![/E67kbTNKNesnLraPG6e/S0qCBRetgy6Lgq7DBHl82g=]"
+email:
+  username: "![PWD+02kJEroP00CYz3aMttVppeigtx9M]"
+  password: "![Qkmtj1OS+czSCDqqVmk17tABCZ+B9LYy]"
+  port: "587"

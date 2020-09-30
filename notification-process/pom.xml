@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.mycompany</groupId>
-	<artifactId>notification-sapi</artifactId>
+	<artifactId>notification-process</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>mule-application</packaging>
 
-	<name>notification-sapi</name>
+	<name>notification-process</name>
 
     <properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,6 +36,12 @@
 	</build>
 
 	<dependencies>
+	<dependency>
+			<groupId>net.mikej.connectors</groupId>
+			<artifactId>pushover-connector</artifactId>
+			<classifier>mule-plugin</classifier>
+			<version>0.0.6-SNAPSHOT</version>
+		</dependency>
         <dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-http-connector</artifactId>
@@ -48,19 +54,7 @@
             <version>1.2.0</version>
             <classifier>mule-plugin</classifier>
         </dependency>
-    	<dependency>
-            <groupId>org.mule.modules</groupId>
-            <artifactId>mule-apikit-module</artifactId>
-            <version>1.3.16</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
-    	<dependency>
-            <groupId>com.mulesoft.connectors</groupId>
-            <artifactId>anypoint-mq-connector</artifactId>
-            <version>3.1.1</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
-    	<dependency>
+		<dependency>
             <groupId>com.mulesoft.modules</groupId>
             <artifactId>mule-secure-configuration-property-module</artifactId>
             <version>1.2.3</version>
@@ -73,11 +67,40 @@
             <classifier>mule-plugin</classifier>
         </dependency>
     	<dependency>
-            <groupId>968cf9cf-415e-4340-817c-e0e32f24a22e</groupId>
-            <artifactId>notification-sapi</artifactId>
-            <version>1.0.1</version>
-            <classifier>raml</classifier>
-            <type>zip</type>
+            <groupId>com.mulesoft.connectors</groupId>
+            <artifactId>anypoint-mq-connector</artifactId>
+            <version>3.1.1</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-vm-connector</artifactId>
+            <version>2.0.0</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-email-connector</artifactId>
+            <version>1.2.1</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-objectstore-connector</artifactId>
+            <version>1.1.5</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-file-connector</artifactId>
+            <version>1.2.0</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-validation-module</artifactId>
+            <version>1.4.0</version>
+            <classifier>mule-plugin</classifier>
         </dependency>
     </dependencies>
 

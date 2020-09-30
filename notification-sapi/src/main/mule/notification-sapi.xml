@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
     <http:listener-config name="notification-sapi-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="notification-sapi-config" api="resource::968cf9cf-415e-4340-817c-e0e32f24a22e:notification-sapi:1.0.0:raml:zip:notification-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="notification-sapi-config" api="resource::968cf9cf-415e-4340-817c-e0e32f24a22e:notification-sapi:1.0.1:raml:zip:notification-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="notification-sapi-main">
         <http:listener config-ref="notification-sapi-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -29,7 +31,7 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
-            <on-error-propagate type="APIKIT:NOT_FOUND">
+            <on-error-propagate type="APIKIT:NOT_FOUND, APP:NOTIFICATION_DOESNT_EXIST" enableNotifications="true" logException="true">
                 <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
@@ -124,58 +126,86 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\notification:notification-sapi-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+        <mongo:find-documents collectionName="notifications" doc:name="retrieve notifications" doc:id="19dd0815-fb15-4177-afbd-b31dd5d259e4" config-ref="MongoDB_Config">
+            <mongo:condition-query><![CDATA[#[output application/json
+---
+{
+	(status: attributes.queryParams.status) if (attributes.queryParams.status?)
+}]]]></mongo:condition-query>
+        </mongo:find-documents>
+		<ee:transform doc:name="convert mongo oid" doc:id="fab22e82-d134-48d3-b78c-467bcc86203b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-[
-  {
-    id: "5f7486a192ea33fe3e2f08b9",
-    status: "pending",
-    message: "This is a sample notification",
-    priority: "High",
-    groupId: 1
-  }, 
-  {
-    id: "5f74939b92ea33fe3e2f08c6",
-    status: "complete",
-    message: "This is a sample notification",
-    priority: "Log",
-    groupId: 0
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+payload map {
+	id: $."_id",
+	($ - "_id")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
     </flow>
     <flow name="get:\notification\(id):notification-sapi-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+        <set-variable value="#[attributes.queryParams.details default false]" doc:name="return full details?" doc:id="ee4ea129-f8a4-4b11-9382-830a53ee7e2f" variableName="details"/>
+		<try doc:name="Try" doc:id="07e89459-ab65-4ede-90fc-4173b8c9ed96" >
+			<mongo:find-one-document doc:name="find specific notification" doc:id="0441288d-730e-4d11-ad65-9489faa035bb" config-ref="MongoDB_Config" collectionName="notifications">
+			<mongo:find-query><![CDATA[#[output application/json
+---
+{
+	"_id": {
+		"\$oid": attributes.uriParams.id
+	}
+}]]]></mongo:find-query>
+		</mongo:find-one-document>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="fcc7678f-f4d4-4d19-aca8-33af97302d95" type="ANY">
+					<raise-error doc:name="Raise NOTIFICATION_DOESNT_EXIST" doc:id="70e30567-11dd-4757-b0b0-0c682b768b79" type="APP:NOTIFICATION_DOESNT_EXIST" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="convert mongo object into return">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-  status: "pending"
+  status: payload.status,
+  (
+  	if (vars.details) payload - "status" - "_id"
+	else {}
+  )
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
     <flow name="post:\notification:application\json:notification-sapi-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
+        <set-variable value='#[output application/json
 ---
 {
-  id: "5f7486a192ea33fe3e2f08b9",
-  status: "pending"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+	(payload - "id" - "status"),
+	status: "pending"
+}]' doc:name="store notification" doc:id="6aba81d3-9b75-4f72-9fca-9c45e96fefeb" variableName="notification"/>
+		<mongo:insert-document collectionName="notifications" doc:name="insert notification" doc:id="47f52fe0-7891-459a-a02a-da6095e92b2b" config-ref="MongoDB_Config">
+			<mongo:document ><![CDATA[#[output application/json
+---
+{
+	(payload - "id" - "status"),
+	status: "pending"
+}]]]></mongo:document>
+		</mongo:insert-document>
+		<anypoint-mq:publish doc:name="Publish" doc:id="13cbf694-6bf1-4044-bc5a-2c99504b9e2d" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.exchange}" target="publishResult" messageId="#[payload]">
+			<anypoint-mq:body ><![CDATA[#[output application/json
+---
+{
+	(vars.notification),
+	id: payload
+}]]]></anypoint-mq:body>
+		</anypoint-mq:publish>
+		<set-payload value='#[output application/json
+---
+{
+	id: payload,
+	status: "pending"
+}]' doc:name="Set Payload" doc:id="280f2a9b-0e4e-40c8-8eb5-df8a902afc89" />
     </flow>
 </mule>
