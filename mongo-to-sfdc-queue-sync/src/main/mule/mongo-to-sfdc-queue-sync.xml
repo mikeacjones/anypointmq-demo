@@ -36,6 +36,7 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			</ee:message>
 		</ee:transform>
 		<anypoint-mq:publish doc:name="push new account into queue" doc:id="647c6189-3e79-491a-98b6-c861395abb32" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.queue}" />
+		<logger level="INFO" doc:name="placeholder for debugging" doc:id="6518c621-4f3f-4e8e-aa8e-5aa4be78f42e" />
 	</flow>
 	<flow name="mongo-to-sfdc-queue-syncFlow1" doc:id="54710164-9837-4fa7-8fbc-b8fec06345f1" initialState="started">
 		<anypoint-mq:subscriber doc:name="new account queue" doc:id="34d14252-237b-4d2a-a59f-1edd8ce7da66" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.queue}"/>
@@ -52,6 +53,5 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 }]]]]></salesforce:records>
 		</salesforce:upsert>
 		<validation:is-true doc:name="validate successful upsert" doc:id="28794339-7c9a-41d5-ba4f-36a643dc4dc8" expression="#[payload.successful]" message="#[payload.items[0].exception.stackTrace]"/>
-		<logger level="INFO" doc:name="Logger" doc:id="3e114a94-c2d1-48f1-96ad-523e68607c87" message="#[payload]"/>
 	</flow>
 </mule>

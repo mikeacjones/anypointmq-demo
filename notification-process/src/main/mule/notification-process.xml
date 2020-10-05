@@ -32,9 +32,9 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 	</flow>
 	<flow name="notification-email-queue" doc:id="f1eef3f9-8cee-45ce-9567-0ca9d9ea90e1" >
 		<anypoint-mq:subscriber doc:name="Subscriber" doc:id="5d07d50c-4ab4-4873-985c-d7338744ba2e" config-ref="Anypoint_MQ_Config" destination="notifications-email"/>
-		<set-variable value="#[attributes.messageId]" doc:name="store messageId" doc:id="88415074-646b-4331-bc1e-8d5e3ff1dc2e" variableName="messageId"/>
-		<choice doc:name="choice" doc:id="11ae60da-edcc-4c6b-b686-7efeb8986b92" >
-			<when expression='#[payload.priority != "Log"]' >
+		<set-variable value="#[attributes.messageId]" doc:name="store messageId" doc:id="88415074-646b-4331-bc1e-8d5e3ff1dc2e" variableName="messageId" />
+		<choice doc:name="choice" doc:id="11ae60da-edcc-4c6b-b686-7efeb8986b92">
+			<when expression='#[payload.priority != "Log"]'>
 				<ee:transform doc:name="get email recipients" doc:id="8b01565c-6ec2-41bf-a27f-53da4f3ec4b9">
 			<ee:message>
 			</ee:message>
@@ -58,7 +58,7 @@ var groups = {
 groups[payload.groupId default 0] default []]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-				<choice doc:name="Choice" doc:id="ba35d2e8-0c77-4c8b-9e25-3ac353a415ef" >
+				<choice doc:name="Choice" doc:id="ba35d2e8-0c77-4c8b-9e25-3ac353a415ef">
 					<when expression="#[sizeOf(vars.recipients) &gt; 0]">
 						<email:send doc:name="send notifications" doc:id="37e7daea-eb14-4d75-9f7d-ada0e81820c7" config-ref="Email_SMTP" toAddresses="#[vars.recipients]" subject='#["$(payload.priority) Priority Notification"]' fromAddress="notifications@kotrs.com">
 						<email:body contentType="text/plain" contentTransferEncoding="BASE64">
