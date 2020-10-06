@@ -22,6 +22,18 @@ In `global.xml` in each project that utilizes a MongoDB, you will need to update
 #### Email
 [You will need an app token from Gmail](https://support.google.com/mail/answer/185833?hl=en). You can not create this token using your work email, and so will need to use either a personal Gmail account or [create a new Gmail account](https://accounts.google.com/signup).
 
+#### Anypoint MQ Setup
+
+You will need to create several queues for this demo. For notification, you will need to create the following queues:
+
+* `notifications-pushover`
+* `notifications-email`
+* `notifications-log`
+
+After creating these queues, create an exchange called `notifications` linked to the queues.
+
+Next, you will need to create a queue called `sfdc-account-sync`. I recommend that you also create a second queue called `sfdc-account-sync-dlq` which you pair with `sfdc-account-sync` in order to demonstrate our OOTB poison queueing. You can create this queue either as a standard or FIFO queue; the project is setup to use an Upsert to Salesforce so if you want to demonstrate a proper sync which maintains state, use a FIFO queue.
+
 #### Notification GroupID
 
 The groupID for notifications is currently hardcoded in the `notification-process` project. In `notification-process.xml` you will need to update the variable `recipients`. This variable should be a JSON map with group IDs linked to an array of email address.
