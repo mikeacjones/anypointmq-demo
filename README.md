@@ -61,7 +61,7 @@ var groups = {
 
 #### MongoDB to Salesforce Queue
 
-Simle insert a new element into the document collection; I recommend using [Compass](https://www.mongodb.com/products/compass) to insert the documents. Structure should look like this:
+Insert a new element into the document collection; I recommend using [Compass](https://www.mongodb.com/products/compass) to insert the documents. Structure should look like this:
 
 ```JSON
 {
