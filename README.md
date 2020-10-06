@@ -88,6 +88,9 @@ Example return:
 
 You can then use this ID to query `/notification/{id}` which will return only the status of the notification. For full details on the notification, GET `/notification/{id}?details=true`. When doing a GET on `/notification` you can also include `/notification?status=complete`.
 
+## Assistance
+If you need help setting the project up, feel free to slack me.
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
