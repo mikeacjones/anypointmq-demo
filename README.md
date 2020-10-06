@@ -16,7 +16,7 @@ You will need to update the configuration for each project with your own credent
 For local development, I recommend adding a `local-props.xml` to the project (.gitignore will prevent accidentally commiting) and adding the global property `securePropertiesKey`. You can also add it as a vm argument in studio, `-M-DsecurePropertiesKey=`.
 
 #### MongoDB
-The project is setup to use a connection string. I recommend using (mongodb.com)[https://mongodb.com] as a free tier host as the free tier never expires.
+The project is setup to use a connection string. I recommend using [mongodb.com](https://mongodb.com) as a free tier host as the free tier never expires.
 In `global.xml` in each project that utilizes a MongoDB, you will need to update the URL to match your setup; the database utilized is controlled via the properties file.
 
 #### Email
