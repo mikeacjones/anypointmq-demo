@@ -34,6 +34,10 @@ After creating these queues, create an exchange called `notifications` linked to
 
 Next, you will need to create a queue called `sfdc-account-sync`. I recommend that you also create a second queue called `sfdc-account-sync-dlq` which you pair with `sfdc-account-sync` in order to demonstrate our OOTB poison queueing. You can create this queue either as a standard or FIFO queue; the project is setup to use an Upsert to Salesforce so if you want to demonstrate a proper sync which maintains state, use a FIFO queue.
 
+#### Salesforce Setup
+
+You will need to [create a salesforce trial account](https://www.salesforce.com/form/signup/freetrial-elf-v2) (if you don't already have one) and [reset your access token](https://help.salesforce.com/apex/HTViewHelpDoc?id=user_security_token.htm) via your developer profile. You will not need to setup any other configuration - this demo currently uses default objects and default object structures within sales force.
+
 #### Notification GroupID
 
 The groupID for notifications is currently hardcoded in the `notification-process` project. In `notification-process.xml` you will need to update the variable `recipients`. This variable should be a JSON map with group IDs linked to an array of email address.
