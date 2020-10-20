@@ -19,6 +19,17 @@ For local development, I recommend adding a `local-props.xml` to the project (.g
 The project is setup to use a connection string. I recommend using [mongodb.com](https://mongodb.com) as a free tier host as the free tier never expires.
 In `global.xml` in each project that utilizes a MongoDB, you will need to update the URL to match your setup; the database utilized is controlled via the properties file.
 
+#### Pushover
+To make use of the pushover connector, [download the JAR file](https://github.com/mikeacjones/mule4-pushover-connector/packages/431396) from the packages page (right hand side) and install it into your local maven repo using the following command:
+
+`mvn install:install-file -Dfile=<path-to-file> -DgroupId=com.mikej.connectors -DartifactId=pushover-connector -Dversion=1.0.1 -Dclassifer=mule-plugin -Dpackaging=jar`
+
+Alternatively, you can download both the JAR and the POM file (same link as above) and install using this command:
+
+`mvn install:install-file -Dfile=<path-to-file> -DpomFile=<path-to-pomfile>`
+
+Once you've installed the connector, you can sign up for free at [https://pushover.net/](https://pushover.net/) for an account which will allow you to send push notification to the app on your phone. Feel free to reach out if you need help with this step.
+
 #### Email
 [You will need an app token from Gmail](https://support.google.com/mail/answer/185833?hl=en). You can not create this token using your work email, and so will need to use either a personal Gmail account or [create a new Gmail account](https://accounts.google.com/signup).
 
