@@ -37,11 +37,11 @@
 
 	<dependencies>
 	<dependency>
-			<groupId>net.mikej.connectors</groupId>
-			<artifactId>pushover-connector</artifactId>
-			<classifier>mule-plugin</classifier>
-			<version>0.0.6-SNAPSHOT</version>
-		</dependency>
+		<groupId>net.mikej.connectors</groupId>
+		<artifactId>pushover-connector</artifactId>
+		<classifier>mule-plugin</classifier>
+		<version>1.0.1</version>
+	</dependency>
         <dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-http-connector</artifactId>
